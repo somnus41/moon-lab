@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>💰 年包涨幅计算器</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  padding: 20px;
+}
+.container {
+  max-width: 720px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 20px;
+  padding: 32px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+h1 {
+  text-align: center;
+  margin-bottom: 28px;
+  color: #1a1a1a;
+  font-size: 24px;
+}
+.columns {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+@media (max-width: 640px) {
+  .columns { flex-direction: column; }
+}
+.card {
+  flex: 1;
+  padding: 18px;
+  border-radius: 14px;
+}
+.card-left {
+  background: #f0f7ff;
+  border: 2px solid #3b82f6;
+}
+.card-right {
+  background: #f0fdf4;
+  border: 2px solid #22c55e;
+}
+.card h3 {
+  margin: 0 0 14px 0;
+  font-size: 16px;
+}
+.card-left h3 { color: #3b82f6; }
+.card-right h3 { color: #22c55e; }
+.field {
+  margin-bottom: 12px;
+}
+.field label {
+  display: block;
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 5px;
+  font-weight: 500;
+}
+.field input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  font-size: 15px;
+  transition: border-color 0.2s;
+}
+.field input:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+.field-row {
+  display: flex;
+  gap: 10px;
+}
+.field-row .field {
+  flex: 1;
+}
+.btn {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #3b82f6, #22c55e);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 17px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-bottom: 20px;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(59,130,246,0.35);
+}
+.btn:active {
+  transform: translateY(0);
+}
+.result-area {
+  display: none;
+}
+.summary {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.summary-box {
+  flex: 1;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 12px;
+  text-align: center;
+  border: 1px solid #e2e8f0;
+}
+.summary-box .label {
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 6px;
+}
+.summary-box .value {
+  font-size: 22px;
+  font-weight: bold;
+}
+.detail-box {
+  padding: 18px;
+  background: #fefce8;
+  border-radius: 12px;
+  border: 1px solid #fde047;
+  margin-bottom: 14px;
+}
+.detail-box h4 {
+  margin: 0 0 12px 0;
+  color: #854d0e;
+  font-size: 14px;
+}
+.detail-box .detail-text {
+  font-size: 13px;
+  color: #444;
+  line-height: 1.9;
+}
+.tip {
+  font-size: 11px;
+  color: #999;
+  text-align: center;
+  line-height: 1.6;
+}
+.auto-badge {
+  display: inline-block;
+  font-size: 11px;
+  color: #3b82f6;
+  background: #dbeafe;
+  padding: 1px 6px;
+  border-radius: 4px;
+  margin-left: 4px;
+  font-weight: normal;
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>💰 年包涨幅计算器</h1>
+
+  <div class="columns">
+    <div class="card card-left">
+      <h3>📊 当前薪资</h3>
+      <div class="field">
+        <label>月薪（元）</label>
+        <input id="curSalary" type="number" placeholder="例如：14000" oninput="autoGjj('cur')">
+      </div>
+      <div class="field">
+        <label>全年总薪数（薪）</label>
+        <input id="curTotalMonths" type="number" step="0.5" placeholder="例如：14" oninput="autoGjj('cur')">
+      </div>
+      <div class="field">
+        <label>公积金基数（元）<span class="auto-badge" id="curAutoBadge">自动</span></label>
+        <input id="curGjjBase" type="number" placeholder="例如：21000" oninput="manualGjj('cur')">
+      </div>
+      <div class="field">
+        <label>公积金比例（%）</label>
+        <input id="curGjjRate" type="number" step="0.5" placeholder="例如：5">
+      </div>
+    </div>
+
+    <div class="card card-right">
+      <h3>🎯 目标薪资</h3>
+      <div class="field">
+        <label>月薪（元）</label>
+        <input id="newSalary" type="number" placeholder="例如：20000" oninput="autoGjj('new')">
+      </div>
+      <div class="field">
+        <label>全年总薪数（薪）</label>
+        <input id="newTotalMonths" type="number" step="0.5" placeholder="例如：16" oninput="autoGjj('new')">
+      </div>
+      <div class="field">
+        <label>公积金基数（元）<span class="auto-badge" id="newAutoBadge">自动</span></label>
+        <input id="newGjjBase" type="number" placeholder="例如：21000" oninput="manualGjj('new')">
+      </div>
+      <div class="field">
+        <label>公积金比例（%）</label>
+        <input id="newGjjRate" type="number" step="0.5" placeholder="例如：12">
+      </div>
+    </div>
+  </div>
+
+  <button class="btn" onclick="calculate()">🚀 计算年包涨幅</button>
+
+  <div class="result-area" id="result">
+    <div class="summary">
+      <div class="summary-box">
+        <div class="label">当前年包</div>
+        <div class="value" id="curTotal" style="color:#3b82f6">-</div>
+      </div>
+      <div class="summary-box">
+        <div class="label">目标年包</div>
+        <div class="value" id="newTotal" style="color:#22c55e">-</div>
+      </div>
+      <div class="summary-box">
+        <div class="label">年包涨幅</div>
+        <div class="value" id="increase">-</div>
+        <button onclick="copyIncrease(this)" style="margin-top: 8px; padding: 4px 12px; font-size: 12px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer;">📋 复制涨幅</button>
+      </div>
+    </div>
+
+    <div class="detail-box">
+      <h4>📋 计算明细</h4>
+      <div class="detail-text" id="detail"></div>
+    </div>
+  </div>
+
+  <div class="tip">
+    💡 年包 = 月薪×12 + 月薪×(总薪数−12) + 公积金基数×比例%×2×12<br>
+    公积金基数默认自动 = 月薪×总薪数÷12，手动修改后变为自定义
+  </div>
+</div>
+
+<script>
+let curManual = false;
+let newManual = false;
+
+function formatMoney(num) {
+  return (num / 10000).toFixed(2) + ' 万';
+}
+
+function autoGjj(side) {
+  if (side === 'cur' && curManual) return;
+  if (side === 'new' && newManual) return;
+
+  const salary = parseFloat(document.getElementById(side + 'Salary').value) || 0;
+  const months = parseFloat(document.getElementById(side + 'TotalMonths').value) || 12;
+  if (salary > 0 && months > 0) {
+    const base = Math.round(salary * months / 12);
+    document.getElementById(side + 'GjjBase').value = base;
+  }
+}
+
+function manualGjj(side) {
+  if (side === 'cur') {
+    curManual = true;
+    document.getElementById('curAutoBadge').textContent = '自定义';
+    document.getElementById('curAutoBadge').style.background = '#fce7f3';
+    document.getElementById('curAutoBadge').style.color = '#db2777';
+  } else {
+    newManual = true;
+    document.getElementById('newAutoBadge').textContent = '自定义';
+    document.getElementById('newAutoBadge').style.background = '#fce7f3';
+    document.getElementById('newAutoBadge').style.color = '#db2777';
+  }
+}
+
+function calculate() {
+  const curSalary = parseFloat(document.getElementById('curSalary').value) || 0;
+  const curTotalMonths = parseFloat(document.getElementById('curTotalMonths').value) || 12;
+  const curGjjBase = parseFloat(document.getElementById('curGjjBase').value) || 0;
+  const curGjjRate = parseFloat(document.getElementById('curGjjRate').value) || 0;
+
+  const newSalary = parseFloat(document.getElementById('newSalary').value) || 0;
+  const newTotalMonths = parseFloat(document.getElementById('newTotalMonths').value) || 12;
+  const newGjjBase = parseFloat(document.getElementById('newGjjBase').value) || 0;
+  const newGjjRate = parseFloat(document.getElementById('newGjjRate').value) || 0;
+
+  if (curSalary <= 0 && newSalary <= 0) {
+    alert('请至少填写一侧的月薪');
+    return;
+  }
+
+  const curBase = curSalary * 12;
+  const curBonus = curSalary * (curTotalMonths - 12);
+  const curGjjPersonal = curGjjBase * (curGjjRate / 100);
+  const curGjjCompany = curGjjBase * (curGjjRate / 100);
+  const curGjjYear = (curGjjPersonal + curGjjCompany) * 12;
+  const curTotal = curBase + curBonus + curGjjYear;
+
+  const newBase = newSalary * 12;
+  const newBonus = newSalary * (newTotalMonths - 12);
+  const newGjjPersonal = newGjjBase * (newGjjRate / 100);
+  const newGjjCompany = newGjjBase * (newGjjRate / 100);
+  const newGjjYear = (newGjjPersonal + newGjjCompany) * 12;
+  const newTotal = newBase + newBonus + newGjjYear;
+
+  const diff = newTotal - curTotal;
+  const pct = curTotal > 0 ? ((diff / curTotal) * 100).toFixed(1) : '0.0';
+
+  document.getElementById('curTotal').textContent = formatMoney(curTotal);
+  document.getElementById('newTotal').textContent = formatMoney(newTotal);
+
+  const increaseEl = document.getElementById('increase');
+  if (diff >= 0) {
+    increaseEl.textContent = '+' + formatMoney(diff) + ' (' + pct + '%)';
+    increaseEl.style.color = '#22c55e';
+  } else {
+    increaseEl.textContent = formatMoney(diff) + ' (' + pct + '%)';
+    increaseEl.style.color = '#ef4444';
+  }
+
+  let detailHtml = '';
+  if (curSalary > 0) {
+    detailHtml += '<b>当前：</b>月薪 ' + curSalary + ' × 12 = ' + formatMoney(curBase);
+    if (curTotalMonths > 12) detailHtml += '，年终奖 ' + (curTotalMonths - 12) + ' 个月 = ' + formatMoney(curBonus);
+    if (curGjjBase > 0 && curGjjRate > 0) {
+      detailHtml += '<br>　　公积金基数 ' + curGjjBase + ' 元，比例 ' + curGjjRate + '%';
+      detailHtml += '<br>　　个人月缴 ' + curGjjPersonal.toFixed(0) + ' + 公司月缴 ' + curGjjCompany.toFixed(0) + ' = ' + (curGjjPersonal + curGjjCompany).toFixed(0) + ' 元/月';
+      detailHtml += '，全年 ' + formatMoney(curGjjYear);
+    }
+    detailHtml += '<br>👉 年包合计：<b>' + formatMoney(curTotal) + '</b><br><br>';
+  }
+  if (newSalary > 0) {
+    detailHtml += '<b>目标：</b>月薪 ' + newSalary + ' × 12 = ' + formatMoney(newBase);
+    if (newTotalMonths > 12) detailHtml += '，年终奖 ' + (newTotalMonths - 12) + ' 个月 = ' + formatMoney(newBonus);
+    if (newGjjBase > 0 && newGjjRate > 0) {
+      detailHtml += '<br>　　公积金基数 ' + newGjjBase + ' 元，比例 ' + newGjjRate + '%';
+      detailHtml += '<br>　　个人月缴 ' + newGjjPersonal.toFixed(0) + ' + 公司月缴 ' + newGjjCompany.toFixed(0) + ' = ' + (newGjjPersonal + newGjjCompany).toFixed(0) + ' 元/月';
+      detailHtml += '，全年 ' + formatMoney(newGjjYear);
+    }
+    detailHtml += '<br>👉 年包合计：<b>' + formatMoney(newTotal) + '</b>';
+  }
+
+  document.getElementById('detail').innerHTML = detailHtml;
+  document.getElementById('result').style.display = 'block';
+}
+</script>
+
+
+<!-- ===== 数字转人民币大写工具 ===== -->
+<div style="max-width: 720px; margin: 24px auto 0; background: #fff; border-radius: 20px; padding: 32px; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+  <h1 style="text-align: center; margin-bottom: 24px; color: #1a1a1a; font-size: 24px;">💴 数字转人民币大写</h1>
+
+  <div style="margin-bottom: 16px;">
+    <label style="display: block; font-size: 13px; color: #666; margin-bottom: 6px; font-weight: 500;">输入金额（元）</label>
+    <input id="rmbInput" type="text" placeholder="例如：14000 或 14000.50" 
+      style="width: 100%; padding: 12px 14px; border: 1px solid #d1d5db; border-radius: 10px; font-size: 16px; transition: border-color 0.2s;"
+      oninput="convertRMB(this.value)">
+  </div>
+
+  <div id="rmbResultBox" style="display: none; padding: 20px; background: #f0fdf4; border-radius: 12px; border: 2px solid #22c55e; margin-bottom: 16px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+      <div style="font-size: 12px; color: #888;">人民币大写</div>
+      <button onclick="copyText('rmbResult', this)" style="padding: 4px 12px; font-size: 12px; background: #22c55e; color: white; border: none; border-radius: 6px; cursor: pointer;">📋 复制</button>
+    </div>
+    <div id="rmbResult" style="font-size: 20px; font-weight: bold; color: #15803d; line-height: 1.6;"></div>
+  </div>
+
+  <div style="font-size: 11px; color: #999; text-align: center;">
+    💡 支持整数和小数，自动处理零的读法
+  </div>
+</div>
+
+<script>
+function copyText(elementId, btn) {
+  const text = document.getElementById(elementId).textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const original = btn.textContent;
+    btn.textContent = '✅ 已复制';
+    btn.style.background = '#15803d';
+    setTimeout(() => {
+      btn.textContent = original;
+      btn.style.background = '#22c55e';
+    }, 1500);
+  });
+}
+
+function copyIncrease(btn) {
+  const text = document.getElementById('increase').textContent;
+  const match = text.match(/\(([^)]+)\)/);
+  const pct = match ? match[1] : text;
+  navigator.clipboard.writeText(pct).then(() => {
+    const original = btn.textContent;
+    btn.textContent = '✅ 已复制 ' + pct;
+    btn.style.background = '#15803d';
+    setTimeout(() => {
+      btn.textContent = original;
+      btn.style.background = '#3b82f6';
+    }, 1500);
+  });
+}
+
+function convertRMB(numStr) {
+  numStr = numStr.trim();
+  if (!numStr || isNaN(numStr)) {
+    document.getElementById('rmbResultBox').style.display = 'none';
+    return;
+  }
+
+  const num = parseFloat(numStr);
+  if (num < 0) {
+    document.getElementById('rmbResultBox').style.display = 'none';
+    return;
+  }
+
+  const result = numberToChinese(num);
+  document.getElementById('rmbResult').textContent = result;
+  document.getElementById('rmbResultBox').style.display = 'block';
+}
+
+function numberToChinese(num) {
+  const cnNums = ['零', '壹', '贰', '叁', '肆', '伍', '陆', '柒', '捌', '玖'];
+  const cnIntUnits = ['', '拾', '佰', '仟'];
+  const cnBigUnits = ['', '万', '亿', '万亿'];
+  const cnDecUnits = ['角', '分'];
+
+  let integerPart = Math.floor(num);
+  let decimalPart = Math.round((num - integerPart) * 100);
+
+  let result = '';
+
+  // 整数部分
+  if (integerPart === 0) {
+    result = '零元';
+  } else {
+    let intStr = integerPart.toString();
+    let groups = [];
+    while (intStr.length > 0) {
+      groups.unshift(intStr.slice(-4));
+      intStr = intStr.slice(0, -4);
+    }
+
+    for (let g = 0; g < groups.length; g++) {
+      let group = groups[g];
+      let groupResult = '';
+      let hasNonZero = false;
+      let zeroCount = 0;
+
+      for (let i = 0; i < group.length; i++) {
+        let digit = parseInt(group[i]);
+        let pos = group.length - 1 - i;
+
+        if (digit === 0) {
+          zeroCount++;
+        } else {
+          if (zeroCount > 0) {
+            groupResult += cnNums[0];
+            zeroCount = 0;
+          }
+          groupResult += cnNums[digit] + cnIntUnits[pos];
+          hasNonZero = true;
+        }
+      }
+
+      // 处理 "一十" 开头的情况，省略 "壹"
+      if (groupResult.startsWith('壹拾') && group.length === 2) {
+        groupResult = groupResult.substring(1);
+      }
+
+      if (hasNonZero || (g < groups.length - 1 && groups[g + 1] && parseInt(groups[g + 1]) > 0)) {
+        result += groupResult + cnBigUnits[groups.length - 1 - g];
+      }
+    }
+
+    result += '元';
+  }
+
+  // 小数部分
+  if (decimalPart === 0) {
+    result += '整';
+  } else {
+    let jiao = Math.floor(decimalPart / 10);
+    let fen = decimalPart % 10;
+
+    if (integerPart === 0 && jiao === 0) {
+      result = '';
+    }
+
+    if (jiao > 0) {
+      result += cnNums[jiao] + '角';
+    } else if (integerPart > 0 && fen > 0) {
+      result += '零';
+    }
+
+    if (fen > 0) {
+      result += cnNums[fen] + '分';
+    }
+  }
+
+  return result;
+}
+</script>
+
+</body>
+</html>
