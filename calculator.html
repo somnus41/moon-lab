@@ -54,33 +54,26 @@ h1 {
 .card-left h3 { color: #3b82f6; }
 .card-right h3 { color: #22c55e; }
 .field {
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 .field label {
   display: block;
   font-size: 13px;
   color: #666;
-  margin-bottom: 5px;
+  margin-bottom: 4px;
   font-weight: 500;
 }
 .field input {
   width: 100%;
-  padding: 10px 12px;
+  padding: 8px 10px;
   border: 1px solid #d1d5db;
-  border-radius: 10px;
-  font-size: 15px;
+  border-radius: 8px;
+  font-size: 14px;
   transition: border-color 0.2s;
 }
 .field input:focus {
   outline: none;
   border-color: #3b82f6;
-}
-.field-row {
-  display: flex;
-  gap: 10px;
-}
-.field-row .field {
-  flex: 1;
 }
 .btn {
   width: 100%;
@@ -112,7 +105,7 @@ h1 {
 }
 .summary-box {
   flex: 1;
-  padding: 16px;
+  padding: 14px;
   background: #f8fafc;
   border-radius: 12px;
   text-align: center;
@@ -121,10 +114,22 @@ h1 {
 .summary-box .label {
   font-size: 12px;
   color: #888;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
-.summary-box .value {
-  font-size: 22px;
+.summary-box .part {
+  padding: 6px 0;
+  border-bottom: 1px dashed #e2e8f0;
+}
+.summary-box .part:last-child {
+  border-bottom: none;
+}
+.summary-box .part-label {
+  font-size: 11px;
+  color: #999;
+  margin-bottom: 2px;
+}
+.summary-box .part-value {
+  font-size: 16px;
   font-weight: bold;
 }
 .detail-box {
@@ -161,6 +166,7 @@ h1 {
   font-weight: normal;
 }
 </style>
+<base target="_blank">
 </head>
 <body>
 <div class="container">
@@ -176,6 +182,14 @@ h1 {
       <div class="field">
         <label>全年总薪数（薪）</label>
         <input id="curTotalMonths" type="number" step="0.5" placeholder="例如：14" oninput="autoGjj('cur')">
+      </div>
+      <div class="field">
+        <label>年终奖收入（元）</label>
+        <input id="curYearEndBonus" type="number" placeholder="额外年终奖金额，例如：30000" oninput="autoGjj('cur')">
+      </div>
+      <div class="field">
+        <label>其他收入（元/年）</label>
+        <input id="curOtherIncome" type="number" placeholder="股票、补贴等，例如：50000" oninput="autoGjj('cur')">
       </div>
       <div class="field">
         <label>公积金基数（元）<span class="auto-badge" id="curAutoBadge">自动</span></label>
@@ -198,6 +212,14 @@ h1 {
         <input id="newTotalMonths" type="number" step="0.5" placeholder="例如：16" oninput="autoGjj('new')">
       </div>
       <div class="field">
+        <label>年终奖收入（元）</label>
+        <input id="newYearEndBonus" type="number" placeholder="额外年终奖金额，例如：50000" oninput="autoGjj('new')">
+      </div>
+      <div class="field">
+        <label>其他收入（元/年）</label>
+        <input id="newOtherIncome" type="number" placeholder="股票、补贴等，例如：80000" oninput="autoGjj('new')">
+      </div>
+      <div class="field">
         <label>公积金基数（元）<span class="auto-badge" id="newAutoBadge">自动</span></label>
         <input id="newGjjBase" type="number" placeholder="例如：21000" oninput="manualGjj('new')">
       </div>
@@ -214,16 +236,37 @@ h1 {
     <div class="summary">
       <div class="summary-box">
         <div class="label">当前年包</div>
-        <div class="value" id="curTotal" style="color:#3b82f6">-</div>
+        <div class="part">
+          <div class="part-label">不含公积金</div>
+          <div class="part-value" id="curNoGjj" style="color:#64748b">-</div>
+        </div>
+        <div class="part">
+          <div class="part-label">含公积金</div>
+          <div class="part-value" id="curTotal" style="color:#3b82f6">-</div>
+        </div>
       </div>
       <div class="summary-box">
         <div class="label">目标年包</div>
-        <div class="value" id="newTotal" style="color:#22c55e">-</div>
+        <div class="part">
+          <div class="part-label">不含公积金</div>
+          <div class="part-value" id="newNoGjj" style="color:#64748b">-</div>
+        </div>
+        <div class="part">
+          <div class="part-label">含公积金</div>
+          <div class="part-value" id="newTotal" style="color:#22c55e">-</div>
+        </div>
       </div>
       <div class="summary-box">
         <div class="label">年包涨幅</div>
-        <div class="value" id="increase">-</div>
-        <button onclick="copyIncrease(this)" style="margin-top: 8px; padding: 4px 12px; font-size: 12px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer;">📋 复制涨幅</button>
+        <div class="part">
+          <div class="part-label">不含公积金</div>
+          <div class="part-value" id="increaseNoGjj" style="color:#64748b">-</div>
+        </div>
+        <div class="part">
+          <div class="part-label">含公积金</div>
+          <div class="part-value" id="increase">-</div>
+        </div>
+        <button onclick="copyIncrease(this)" style="margin-top: 6px; padding: 4px 12px; font-size: 12px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer;">📋 复制涨幅</button>
       </div>
     </div>
 
@@ -234,117 +277,10 @@ h1 {
   </div>
 
   <div class="tip">
-    💡 年包 = 月薪×12 + 月薪×(总薪数−12) + 公积金基数×比例%×2×12<br>
-    公积金基数默认自动 = 月薪×总薪数÷12，手动修改后变为自定义
+    💡 年包 = 月薪×12 + 月薪×(总薪数−12) + 年终奖收入 + 其他收入 + 公积金基数×比例%×2×12<br>
+    公积金基数 = (月薪×12 + 月薪×(总薪数−12) + 年终奖收入 + 其他收入) ÷ 12
   </div>
 </div>
-
-<script>
-let curManual = false;
-let newManual = false;
-
-function formatMoney(num) {
-  return (num / 10000).toFixed(2) + ' 万';
-}
-
-function autoGjj(side) {
-  if (side === 'cur' && curManual) return;
-  if (side === 'new' && newManual) return;
-
-  const salary = parseFloat(document.getElementById(side + 'Salary').value) || 0;
-  const months = parseFloat(document.getElementById(side + 'TotalMonths').value) || 12;
-  if (salary > 0 && months > 0) {
-    const base = Math.round(salary * months / 12);
-    document.getElementById(side + 'GjjBase').value = base;
-  }
-}
-
-function manualGjj(side) {
-  if (side === 'cur') {
-    curManual = true;
-    document.getElementById('curAutoBadge').textContent = '自定义';
-    document.getElementById('curAutoBadge').style.background = '#fce7f3';
-    document.getElementById('curAutoBadge').style.color = '#db2777';
-  } else {
-    newManual = true;
-    document.getElementById('newAutoBadge').textContent = '自定义';
-    document.getElementById('newAutoBadge').style.background = '#fce7f3';
-    document.getElementById('newAutoBadge').style.color = '#db2777';
-  }
-}
-
-function calculate() {
-  const curSalary = parseFloat(document.getElementById('curSalary').value) || 0;
-  const curTotalMonths = parseFloat(document.getElementById('curTotalMonths').value) || 12;
-  const curGjjBase = parseFloat(document.getElementById('curGjjBase').value) || 0;
-  const curGjjRate = parseFloat(document.getElementById('curGjjRate').value) || 0;
-
-  const newSalary = parseFloat(document.getElementById('newSalary').value) || 0;
-  const newTotalMonths = parseFloat(document.getElementById('newTotalMonths').value) || 12;
-  const newGjjBase = parseFloat(document.getElementById('newGjjBase').value) || 0;
-  const newGjjRate = parseFloat(document.getElementById('newGjjRate').value) || 0;
-
-  if (curSalary <= 0 && newSalary <= 0) {
-    alert('请至少填写一侧的月薪');
-    return;
-  }
-
-  const curBase = curSalary * 12;
-  const curBonus = curSalary * (curTotalMonths - 12);
-  const curGjjPersonal = curGjjBase * (curGjjRate / 100);
-  const curGjjCompany = curGjjBase * (curGjjRate / 100);
-  const curGjjYear = (curGjjPersonal + curGjjCompany) * 12;
-  const curTotal = curBase + curBonus + curGjjYear;
-
-  const newBase = newSalary * 12;
-  const newBonus = newSalary * (newTotalMonths - 12);
-  const newGjjPersonal = newGjjBase * (newGjjRate / 100);
-  const newGjjCompany = newGjjBase * (newGjjRate / 100);
-  const newGjjYear = (newGjjPersonal + newGjjCompany) * 12;
-  const newTotal = newBase + newBonus + newGjjYear;
-
-  const diff = newTotal - curTotal;
-  const pct = curTotal > 0 ? ((diff / curTotal) * 100).toFixed(1) : '0.0';
-
-  document.getElementById('curTotal').textContent = formatMoney(curTotal);
-  document.getElementById('newTotal').textContent = formatMoney(newTotal);
-
-  const increaseEl = document.getElementById('increase');
-  if (diff >= 0) {
-    increaseEl.textContent = '+' + formatMoney(diff) + ' (' + pct + '%)';
-    increaseEl.style.color = '#22c55e';
-  } else {
-    increaseEl.textContent = formatMoney(diff) + ' (' + pct + '%)';
-    increaseEl.style.color = '#ef4444';
-  }
-
-  let detailHtml = '';
-  if (curSalary > 0) {
-    detailHtml += '<b>当前：</b>月薪 ' + curSalary + ' × 12 = ' + formatMoney(curBase);
-    if (curTotalMonths > 12) detailHtml += '，年终奖 ' + (curTotalMonths - 12) + ' 个月 = ' + formatMoney(curBonus);
-    if (curGjjBase > 0 && curGjjRate > 0) {
-      detailHtml += '<br>　　公积金基数 ' + curGjjBase + ' 元，比例 ' + curGjjRate + '%';
-      detailHtml += '<br>　　个人月缴 ' + curGjjPersonal.toFixed(0) + ' + 公司月缴 ' + curGjjCompany.toFixed(0) + ' = ' + (curGjjPersonal + curGjjCompany).toFixed(0) + ' 元/月';
-      detailHtml += '，全年 ' + formatMoney(curGjjYear);
-    }
-    detailHtml += '<br>👉 年包合计：<b>' + formatMoney(curTotal) + '</b><br><br>';
-  }
-  if (newSalary > 0) {
-    detailHtml += '<b>目标：</b>月薪 ' + newSalary + ' × 12 = ' + formatMoney(newBase);
-    if (newTotalMonths > 12) detailHtml += '，年终奖 ' + (newTotalMonths - 12) + ' 个月 = ' + formatMoney(newBonus);
-    if (newGjjBase > 0 && newGjjRate > 0) {
-      detailHtml += '<br>　　公积金基数 ' + newGjjBase + ' 元，比例 ' + newGjjRate + '%';
-      detailHtml += '<br>　　个人月缴 ' + newGjjPersonal.toFixed(0) + ' + 公司月缴 ' + newGjjCompany.toFixed(0) + ' = ' + (newGjjPersonal + newGjjCompany).toFixed(0) + ' 元/月';
-      detailHtml += '，全年 ' + formatMoney(newGjjYear);
-    }
-    detailHtml += '<br>👉 年包合计：<b>' + formatMoney(newTotal) + '</b>';
-  }
-
-  document.getElementById('detail').innerHTML = detailHtml;
-  document.getElementById('result').style.display = 'block';
-}
-</script>
-
 
 <!-- ===== 数字转人民币大写工具 ===== -->
 <div style="max-width: 720px; margin: 24px auto 0; background: #fff; border-radius: 20px; padding: 32px; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
@@ -371,6 +307,139 @@ function calculate() {
 </div>
 
 <script>
+let curManual = false;
+let newManual = false;
+
+function formatMoney(num) {
+  return (num / 10000).toFixed(2) + ' 万';
+}
+
+function autoGjj(side) {
+  if (side === 'cur' && curManual) return;
+  if (side === 'new' && newManual) return;
+
+  const salary = parseFloat(document.getElementById(side + 'Salary').value) || 0;
+  const months = parseFloat(document.getElementById(side + 'TotalMonths').value) || 12;
+  const yearEndBonus = parseFloat(document.getElementById(side + 'YearEndBonus').value) || 0;
+  const otherIncome = parseFloat(document.getElementById(side + 'OtherIncome').value) || 0;
+
+  if (salary > 0) {
+    // 公积金基数 = 年总收入 ÷ 12
+    // 年总收入 = 月薪×12 + 月薪×(总薪数−12) + 年终奖收入 + 其他收入
+    const annualIncome = salary * 12 + salary * (months - 12) + yearEndBonus + otherIncome;
+    const base = Math.round(annualIncome / 12);
+    document.getElementById(side + 'GjjBase').value = base;
+  }
+}
+
+function manualGjj(side) {
+  if (side === 'cur') {
+    curManual = true;
+    document.getElementById('curAutoBadge').textContent = '自定义';
+    document.getElementById('curAutoBadge').style.background = '#fce7f3';
+    document.getElementById('curAutoBadge').style.color = '#db2777';
+  } else {
+    newManual = true;
+    document.getElementById('newAutoBadge').textContent = '自定义';
+    document.getElementById('newAutoBadge').style.background = '#fce7f3';
+    document.getElementById('newAutoBadge').style.color = '#db2777';
+  }
+}
+
+function calculate() {
+  const curSalary = parseFloat(document.getElementById('curSalary').value) || 0;
+  const curTotalMonths = parseFloat(document.getElementById('curTotalMonths').value) || 12;
+  const curYearEndBonus = parseFloat(document.getElementById('curYearEndBonus').value) || 0;
+  const curOtherIncome = parseFloat(document.getElementById('curOtherIncome').value) || 0;
+  const curGjjBase = parseFloat(document.getElementById('curGjjBase').value) || 0;
+  const curGjjRate = parseFloat(document.getElementById('curGjjRate').value) || 0;
+
+  const newSalary = parseFloat(document.getElementById('newSalary').value) || 0;
+  const newTotalMonths = parseFloat(document.getElementById('newTotalMonths').value) || 12;
+  const newYearEndBonus = parseFloat(document.getElementById('newYearEndBonus').value) || 0;
+  const newOtherIncome = parseFloat(document.getElementById('newOtherIncome').value) || 0;
+  const newGjjBase = parseFloat(document.getElementById('newGjjBase').value) || 0;
+  const newGjjRate = parseFloat(document.getElementById('newGjjRate').value) || 0;
+
+  if (curSalary <= 0 && newSalary <= 0) {
+    alert('请至少填写一侧的月薪');
+    return;
+  }
+
+  const curBase = curSalary * 12;
+  const curBonusMonths = curSalary * (curTotalMonths - 12);
+  const curGjjPersonal = curGjjBase * (curGjjRate / 100);
+  const curGjjCompany = curGjjBase * (curGjjRate / 100);
+  const curGjjYear = (curGjjPersonal + curGjjCompany) * 12;
+  const curNoGjj = curBase + curBonusMonths + curYearEndBonus + curOtherIncome;
+  const curTotal = curNoGjj + curGjjYear;
+
+  const newBase = newSalary * 12;
+  const newBonusMonths = newSalary * (newTotalMonths - 12);
+  const newGjjPersonal = newGjjBase * (newGjjRate / 100);
+  const newGjjCompany = newGjjBase * (newGjjRate / 100);
+  const newGjjYear = (newGjjPersonal + newGjjCompany) * 12;
+  const newNoGjj = newBase + newBonusMonths + newYearEndBonus + newOtherIncome;
+  const newTotal = newNoGjj + newGjjYear;
+
+  const diff = newTotal - curTotal;
+  const pct = curTotal > 0 ? ((diff / curTotal) * 100).toFixed(1) : '0.0';
+
+  const diffNoGjj = newNoGjj - curNoGjj;
+  const pctNoGjj = curNoGjj > 0 ? ((diffNoGjj / curNoGjj) * 100).toFixed(1) : '0.0';
+
+  document.getElementById('curTotal').textContent = formatMoney(curTotal);
+  document.getElementById('curNoGjj').textContent = formatMoney(curNoGjj);
+  document.getElementById('newTotal').textContent = formatMoney(newTotal);
+  document.getElementById('newNoGjj').textContent = formatMoney(newNoGjj);
+
+  const increaseEl = document.getElementById('increase');
+  const increaseNoGjjEl = document.getElementById('increaseNoGjj');
+
+  if (diff >= 0) {
+    increaseEl.textContent = '+' + formatMoney(diff) + ' (' + pct + '%)';
+    increaseEl.style.color = '#22c55e';
+  } else {
+    increaseEl.textContent = formatMoney(diff) + ' (' + pct + '%)';
+    increaseEl.style.color = '#ef4444';
+  }
+
+  if (diffNoGjj >= 0) {
+    increaseNoGjjEl.textContent = '+' + formatMoney(diffNoGjj) + ' (' + pctNoGjj + '%)';
+    increaseNoGjjEl.style.color = '#22c55e';
+  } else {
+    increaseNoGjjEl.textContent = formatMoney(diffNoGjj) + ' (' + pctNoGjj + '%)';
+    increaseNoGjjEl.style.color = '#ef4444';
+  }
+
+  let detailHtml = '';
+  if (curSalary > 0) {
+    detailHtml += '<b>当前：</b>月薪 ' + curSalary + ' × 12 = ' + formatMoney(curBase);
+    if (curTotalMonths > 12) detailHtml += '，年终奖 ' + (curTotalMonths - 12) + ' 个月 = ' + formatMoney(curBonusMonths);
+    if (curYearEndBonus > 0) detailHtml += '，额外年终奖 = ' + formatMoney(curYearEndBonus);
+    if (curOtherIncome > 0) detailHtml += '，其他收入 = ' + formatMoney(curOtherIncome);
+    if (curGjjBase > 0 && curGjjRate > 0) {
+      detailHtml += '<br>　　公积金基数 ' + curGjjBase + ' 元，比例 ' + curGjjRate + '%';
+      detailHtml += '，' + curGjjRate + '% 双边 = ' + formatMoney(curGjjYear);
+    }
+    detailHtml += '<br>👉 年包合计：<b>' + formatMoney(curTotal) + '</b><br><br>';
+  }
+  if (newSalary > 0) {
+    detailHtml += '<b>目标：</b>月薪 ' + newSalary + ' × 12 = ' + formatMoney(newBase);
+    if (newTotalMonths > 12) detailHtml += '，年终奖 ' + (newTotalMonths - 12) + ' 个月 = ' + formatMoney(newBonusMonths);
+    if (newYearEndBonus > 0) detailHtml += '，额外年终奖 = ' + formatMoney(newYearEndBonus);
+    if (newOtherIncome > 0) detailHtml += '，其他收入 = ' + formatMoney(newOtherIncome);
+    if (newGjjBase > 0 && newGjjRate > 0) {
+      detailHtml += '<br>　　公积金基数 ' + newGjjBase + ' 元，比例 ' + newGjjRate + '%';
+      detailHtml += '，' + newGjjRate + '% 双边 = ' + formatMoney(newGjjYear);
+    }
+    detailHtml += '<br>👉 年包合计：<b>' + formatMoney(newTotal) + '</b>';
+  }
+
+  document.getElementById('detail').innerHTML = detailHtml;
+  document.getElementById('result').style.display = 'block';
+}
+
 function copyText(elementId, btn) {
   const text = document.getElementById(elementId).textContent;
   navigator.clipboard.writeText(text).then(() => {
@@ -428,7 +497,6 @@ function numberToChinese(num) {
 
   let result = '';
 
-  // 整数部分
   if (integerPart === 0) {
     result = '零元';
   } else {
@@ -461,7 +529,6 @@ function numberToChinese(num) {
         }
       }
 
-      // 处理 "一十" 开头的情况，省略 "壹"
       if (groupResult.startsWith('壹拾') && group.length === 2) {
         groupResult = groupResult.substring(1);
       }
@@ -474,7 +541,6 @@ function numberToChinese(num) {
     result += '元';
   }
 
-  // 小数部分
   if (decimalPart === 0) {
     result += '整';
   } else {
@@ -499,6 +565,5 @@ function numberToChinese(num) {
   return result;
 }
 </script>
-
 </body>
 </html>
