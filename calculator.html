@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -188,8 +188,12 @@ h1 {
         <input id="curYearEndBonus" type="number" placeholder="额外年终奖金额，例如：30000" oninput="autoGjj('cur')">
       </div>
       <div class="field">
-        <label>其他收入（元/年）</label>
-        <input id="curOtherIncome" type="number" placeholder="股票、补贴等，例如：50000" oninput="autoGjj('cur')">
+        <label>补贴（元/年）<span style="font-size:11px;color:#999">计入公积金基数</span></label>
+        <input id="curSubsidy" type="number" placeholder="交通、餐补等，例如：20000" oninput="autoGjj('cur')">
+      </div>
+      <div class="field">
+        <label>股票（元/年）<span style="font-size:11px;color:#999">不计入公积金基数</span></label>
+        <input id="curStock" type="number" placeholder="股票、期权等，例如：50000">
       </div>
       <div class="field">
         <label>公积金基数（元）<span class="auto-badge" id="curAutoBadge">自动</span></label>
@@ -216,8 +220,12 @@ h1 {
         <input id="newYearEndBonus" type="number" placeholder="额外年终奖金额，例如：50000" oninput="autoGjj('new')">
       </div>
       <div class="field">
-        <label>其他收入（元/年）</label>
-        <input id="newOtherIncome" type="number" placeholder="股票、补贴等，例如：80000" oninput="autoGjj('new')">
+        <label>补贴（元/年）<span style="font-size:11px;color:#999">计入公积金基数</span></label>
+        <input id="newSubsidy" type="number" placeholder="交通、餐补等，例如：30000" oninput="autoGjj('new')">
+      </div>
+      <div class="field">
+        <label>股票（元/年）<span style="font-size:11px;color:#999">不计入公积金基数</span></label>
+        <input id="newStock" type="number" placeholder="股票、期权等，例如：80000">
       </div>
       <div class="field">
         <label>公积金基数（元）<span class="auto-badge" id="newAutoBadge">自动</span></label>
@@ -277,8 +285,8 @@ h1 {
   </div>
 
   <div class="tip">
-    💡 年包 = 月薪×12 + 月薪×(总薪数−12) + 年终奖收入 + 其他收入 + 公积金基数×比例%×2×12<br>
-    公积金基数 = (月薪×12 + 月薪×(总薪数−12) + 年终奖收入 + 其他收入) ÷ 12
+    💡 年包 = 月薪×12 + 月薪×(总薪数−12) + 年终奖收入 + 补贴 + 股票 + 公积金基数×比例%×2×12<br>
+    公积金基数 = (月薪×12 + 月薪×(总薪数−12) + 年终奖收入 + 补贴) ÷ 12　（股票不计入）
   </div>
 </div>
 
@@ -321,13 +329,12 @@ function autoGjj(side) {
   const salary = parseFloat(document.getElementById(side + 'Salary').value) || 0;
   const months = parseFloat(document.getElementById(side + 'TotalMonths').value) || 12;
   const yearEndBonus = parseFloat(document.getElementById(side + 'YearEndBonus').value) || 0;
-  const otherIncome = parseFloat(document.getElementById(side + 'OtherIncome').value) || 0;
+  const subsidy = parseFloat(document.getElementById(side + 'Subsidy').value) || 0;
+  // 股票不计入公积金基数
 
   if (salary > 0) {
-    // 公积金基数 = 年总收入 ÷ 12
-    // 年总收入 = 月薪×12 + 月薪×(总薪数−12) + 年终奖收入 + 其他收入
-    const annualIncome = salary * 12 + salary * (months - 12) + yearEndBonus + otherIncome;
-    const base = Math.round(annualIncome / 12);
+    const annualIncomeForGjj = salary * 12 + salary * (months - 12) + yearEndBonus + subsidy;
+    const base = Math.round(annualIncomeForGjj / 12);
     document.getElementById(side + 'GjjBase').value = base;
   }
 }
@@ -350,14 +357,16 @@ function calculate() {
   const curSalary = parseFloat(document.getElementById('curSalary').value) || 0;
   const curTotalMonths = parseFloat(document.getElementById('curTotalMonths').value) || 12;
   const curYearEndBonus = parseFloat(document.getElementById('curYearEndBonus').value) || 0;
-  const curOtherIncome = parseFloat(document.getElementById('curOtherIncome').value) || 0;
+  const curSubsidy = parseFloat(document.getElementById('curSubsidy').value) || 0;
+  const curStock = parseFloat(document.getElementById('curStock').value) || 0;
   const curGjjBase = parseFloat(document.getElementById('curGjjBase').value) || 0;
   const curGjjRate = parseFloat(document.getElementById('curGjjRate').value) || 0;
 
   const newSalary = parseFloat(document.getElementById('newSalary').value) || 0;
   const newTotalMonths = parseFloat(document.getElementById('newTotalMonths').value) || 12;
   const newYearEndBonus = parseFloat(document.getElementById('newYearEndBonus').value) || 0;
-  const newOtherIncome = parseFloat(document.getElementById('newOtherIncome').value) || 0;
+  const newSubsidy = parseFloat(document.getElementById('newSubsidy').value) || 0;
+  const newStock = parseFloat(document.getElementById('newStock').value) || 0;
   const newGjjBase = parseFloat(document.getElementById('newGjjBase').value) || 0;
   const newGjjRate = parseFloat(document.getElementById('newGjjRate').value) || 0;
 
@@ -371,7 +380,7 @@ function calculate() {
   const curGjjPersonal = curGjjBase * (curGjjRate / 100);
   const curGjjCompany = curGjjBase * (curGjjRate / 100);
   const curGjjYear = (curGjjPersonal + curGjjCompany) * 12;
-  const curNoGjj = curBase + curBonusMonths + curYearEndBonus + curOtherIncome;
+  const curNoGjj = curBase + curBonusMonths + curYearEndBonus + curSubsidy + curStock;
   const curTotal = curNoGjj + curGjjYear;
 
   const newBase = newSalary * 12;
@@ -379,7 +388,7 @@ function calculate() {
   const newGjjPersonal = newGjjBase * (newGjjRate / 100);
   const newGjjCompany = newGjjBase * (newGjjRate / 100);
   const newGjjYear = (newGjjPersonal + newGjjCompany) * 12;
-  const newNoGjj = newBase + newBonusMonths + newYearEndBonus + newOtherIncome;
+  const newNoGjj = newBase + newBonusMonths + newYearEndBonus + newSubsidy + newStock;
   const newTotal = newNoGjj + newGjjYear;
 
   const diff = newTotal - curTotal;
@@ -417,7 +426,8 @@ function calculate() {
     detailHtml += '<b>当前：</b>月薪 ' + curSalary + ' × 12 = ' + formatMoney(curBase);
     if (curTotalMonths > 12) detailHtml += '，年终奖 ' + (curTotalMonths - 12) + ' 个月 = ' + formatMoney(curBonusMonths);
     if (curYearEndBonus > 0) detailHtml += '，额外年终奖 = ' + formatMoney(curYearEndBonus);
-    if (curOtherIncome > 0) detailHtml += '，其他收入 = ' + formatMoney(curOtherIncome);
+    if (curSubsidy > 0) detailHtml += '，补贴 = ' + formatMoney(curSubsidy);
+    if (curStock > 0) detailHtml += '，股票 = ' + formatMoney(curStock);
     if (curGjjBase > 0 && curGjjRate > 0) {
       detailHtml += '<br>　　公积金基数 ' + curGjjBase + ' 元，比例 ' + curGjjRate + '%';
       detailHtml += '，' + curGjjRate + '% 双边 = ' + formatMoney(curGjjYear);
@@ -428,7 +438,8 @@ function calculate() {
     detailHtml += '<b>目标：</b>月薪 ' + newSalary + ' × 12 = ' + formatMoney(newBase);
     if (newTotalMonths > 12) detailHtml += '，年终奖 ' + (newTotalMonths - 12) + ' 个月 = ' + formatMoney(newBonusMonths);
     if (newYearEndBonus > 0) detailHtml += '，额外年终奖 = ' + formatMoney(newYearEndBonus);
-    if (newOtherIncome > 0) detailHtml += '，其他收入 = ' + formatMoney(newOtherIncome);
+    if (newSubsidy > 0) detailHtml += '，补贴 = ' + formatMoney(newSubsidy);
+    if (newStock > 0) detailHtml += '，股票 = ' + formatMoney(newStock);
     if (newGjjBase > 0 && newGjjRate > 0) {
       detailHtml += '<br>　　公积金基数 ' + newGjjBase + ' 元，比例 ' + newGjjRate + '%';
       detailHtml += '，' + newGjjRate + '% 双边 = ' + formatMoney(newGjjYear);
